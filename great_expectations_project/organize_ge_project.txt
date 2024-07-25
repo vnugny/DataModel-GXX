@@ -1,0 +1,13 @@
+great_expectations_project/
+├── README.md
+├── requirements.txt
+├── setup.py
+├── src/
+│   ├── __init__.py
+│   ├── data_validation.py
+│   ├── models.py
+├── scripts/
+│   ├── run_validations.py
+├── config/
+│   ├── great_expectations.yml
+│   ├── datasources.yml
