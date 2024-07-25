@@ -67,3 +67,22 @@ INSERT INTO expectations (suite_id, expectation_type, kwargs) VALUES
 (1, 'expect_column_values_to_not_be_null', '{"column": "signup_date"}'),
 (1, 'expect_column_to_exist', '{"column": "age"}'),
 (1, 'expect_column_values_to_be_between', '{"column": "age", "min_value": 18, "max_value": 99}');
+
+-- Create the customers table
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    signup_date DATE NOT NULL,
+    age INTEGER CHECK (age BETWEEN 18 AND 99)
+);
+
+-- Insert sample data into the customers table
+INSERT INTO customers (name, email, signup_date, age) VALUES
+('Alice Johnson', 'alice.johnson@example.com', '2023-01-15', 25),
+('Bob Smith', 'bob.smith@example.com', '2023-02-20', 30),
+('Carol White', 'carol.white@example.com', '2023-03-05', 45),
+('David Brown', 'david.brown@example.com', '2023-04-10', 50),
+('Eve Black', 'eve.black@example.com', '2023-05-25', 60);
+
+
