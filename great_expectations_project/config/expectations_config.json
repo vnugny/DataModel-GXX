@@ -1,0 +1,19 @@
+{
+    "expectations": [
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "column": "id"
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_between",
+            "column": "age",
+            "min_value": 18,
+            "max_value": 99
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "column": "status",
+            "value_set": ["active", "inactive", "pending"]
+        }
+    ]
+}
