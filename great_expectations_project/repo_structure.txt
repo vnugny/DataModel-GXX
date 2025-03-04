@@ -1,0 +1,17 @@
+📂 great-expectations-data-validation
+│── 📂 data/                            # Sample datasets
+│   ├── sample_data.csv                 # Example dataset
+│── 📂 validation_results/               # Stores validation reports in JSON
+│── 📂 dags/                             # Airflow DAGs for scheduling validation
+│   ├── data_quality_dag.py              # Airflow DAG for scheduling
+│── 📂 configs/                          # Configuration files
+│   ├── data_source_config.json          # JSON defining data source
+│   ├── expectations_config.json         # JSON defining validation expectations
+│── 📂 scripts/                          # Python scripts for validation
+│   ├── validate_data.py                 # Main validation script
+│── 📂 great_expectations/               # GX configuration
+│── 📂 .github/workflows/                # GitHub Actions workflows
+│   ├── data_validation.yml              # GitHub workflow for validation
+│── .gitignore                           # Ignore unnecessary files
+│── README.md                            # Documentation
+│── requirements.txt                      # Dependencies
