@@ -9,6 +9,7 @@
 │   ├── expectations_config.json         # JSON defining validation expectations
 │── 📂 scripts/                          # Python scripts for validation
 │   ├── validate_data.py                 # Main validation script
+│   ├── run_validations.py               # Main validation script
 │── 📂 great_expectations/               # GX configuration
 │── 📂 .github/workflows/                # GitHub Actions workflows
 │   ├── data_validation.yml              # GitHub workflow for validation
