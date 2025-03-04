@@ -1,0 +1,13 @@
+{
+    "source_type": "csv",
+    "file_path": "data/sample_data.csv",
+    "database": {
+        "type": "postgresql",
+        "host": "localhost",
+        "port": "5432",
+        "database": "data_quality_db",
+        "user": "username",
+        "password": "password",
+        "table_name": "my_table"
+    }
+}
