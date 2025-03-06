@@ -6,8 +6,7 @@ import logging
 import re
 import time
 from great_expectations.core import ExpectationSuite, ExpectationConfiguration
-from great_expectations.validator.validator import Validator
-from great_expectations.core.batch import BatchRequest
+from great_expectations.core.batch import RuntimeBatchRequest
 from sqlalchemy import create_engine, Table, Column, Integer, String, Float, JSON, MetaData
 from datetime import datetime
 
@@ -77,36 +76,34 @@ def validate_data(data_source_path: str, expectations_suite_path: str, results_c
         # === Initialize Great Expectations ===
         context = gx.get_context()
 
-        # Define a Datasource (needed for BatchRequest)
-        context.test_yaml_config(
-            f"""
-            name: pandas_datasource
-            class_name: Datasource
-            execution_engine:
-                class_name: PandasExecutionEngine
-            data_connectors:
-                default_runtime_data_connector:
-                    class_name: RuntimeDataConnector
-                    batch_identifiers:
-                        - default_identifier_name
-            """
+        # Define a Datasource (needed for RuntimeBatchRequest)
+        context.add_datasource(
+            name="pandas_datasource",
+            class_name="Datasource",
+            execution_engine={"class_name": "PandasExecutionEngine"},
+            data_connectors={
+                "runtime_data_connector": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"]
+                }
+            }
         )
 
         suite_name = expectation_suite_data.get("expectation_suite_name", "default_suite")
-        
+
         # Create an Expectation Suite object
         context.add_expectation_suite(expectation_suite_name=suite_name)
 
-        # Create a BatchRequest (Fixing the previous missing error)
-        batch_request = BatchRequest(
+        # Create a RuntimeBatchRequest (Fixing previous missing asset names)
+        batch_request = RuntimeBatchRequest(
             datasource_name="pandas_datasource",
-            data_connector_name="default_runtime_data_connector",
-            data_asset_name="runtime_data",
-            runtime_parameters={"batch_data": df},  # Pass the DataFrame as batch data
+            data_connector_name="runtime_data_connector",
+            data_asset_name="runtime_asset",  # Must be a string identifier
+            runtime_parameters={"batch_data": df},  # Pass the DataFrame dynamically
             batch_identifiers={"default_identifier_name": "batch_001"},
         )
 
-        # Create a Validator using the BatchRequest
+        # Create a Validator using the RuntimeBatchRequest
         validator = context.get_validator(batch_request=batch_request, expectation_suite_name=suite_name)
 
         # Add expectations from the JSON expectation suite
