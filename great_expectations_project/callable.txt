@@ -1,0 +1,4 @@
+validate_data("configs/data_source_config.json", "configs/expectations_config.json", "configs/results_capture.json")
+
+validate_data("configs/data_source_config.json", "configs/expectations_config.json")
+
