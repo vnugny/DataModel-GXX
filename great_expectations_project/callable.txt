@@ -2,3 +2,10 @@ validate_data("configs/data_source_config.json", "configs/expectations_config.js
 
 validate_data("configs/data_source_config.json", "configs/expectations_config.json")
 
+execute first final
+
+python validation.py --data-source configs/data_source_config.json --expectations configs/expectations_suite.json --results configs/results_capture.json
+
+python validation.py --data-source configs/data_source_config.json --expectations configs/expectations_suite.json
+
+
