@@ -1,0 +1,181 @@
+{
+    "meta": {
+        "great_expectations_version": "0.13.0"
+    },
+    "expectations": [
+        {
+            "expectation_type": "expect_table_row_count_to_be_between",
+            "kwargs": {
+                "min_value": 1
+            }
+        },
+        {
+            "expectation_type": "expect_column_to_exist",
+            "kwargs": {
+                "column": "vendor_id"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "vendor_id"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "vendor_id",
+                "type_": "TEXT"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "pickup_datetime",
+                "type_": "TIMESTAMP"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "dropoff_datetime",
+                "type_": "TIMESTAMP"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "passenger_count",
+                "type_": "INTEGER"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "passenger_count",
+                "value_set": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    null
+                ]
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "trip_distance",
+                "type_": "NUMERIC"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "trip_distance"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "rate_code_id",
+                "type_": "INTEGER"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "rate_code_id",
+                "value_set": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                ]
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "store_and_fwd_flag",
+                "type_": "CHAR"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "store_and_fwd_flag",
+                "value_set": [
+                    "Y",
+                    "N",
+                    null
+                ]
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "pickup_location_id",
+                "type_": "INTEGER"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "dropoff_location_id",
+                "type_": "INTEGER"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "payment_type",
+                "type_": "INTEGER"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_in_set",
+            "kwargs": {
+                "column": "payment_type",
+                "value_set": [
+                    1,
+                    2,
+                    3,
+                    4
+                ]
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "fare_amount",
+                "type_": "NUMERIC"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "fare_amount"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_be_of_type",
+            "kwargs": {
+                "column": "total_amount",
+                "type_": "NUMERIC"
+            }
+        },
+        {
+            "expectation_type": "expect_column_values_to_not_be_null",
+            "kwargs": {
+                "column": "total_amount"
+            }
+        }
+    ]
+}
