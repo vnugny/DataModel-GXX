@@ -1,0 +1,38 @@
+# 📓 Jupyter Notebook: Run Great Expectations Validation
+
+# ✅ Step 1: Import the validation function
+from validation import run_data_validation
+
+# ✅ Step 2: Define configuration file paths
+data_source_path = "configs/data_source_config.json"
+expectations_path = "configs/expectations_suite.json"
+results_path = "configs/results_capture.json"  # Optional, can be None
+
+# ✅ Step 3: Run the validation and capture the output
+results = run_data_validation(
+    data_source_config=data_source_path,
+    expectations_suite=expectations_path,
+    results_config=results_path
+)
+
+# ✅ Step 4: Display validation results
+print("\nValidation Summary File:", results["summary_file"])
+print("Validation Details File:", results["details_file"])
+print("Log File:", results["log_file"])
+print("Success:", results["success"])
+
+# ✅ Optional: Load and display validation summary
+import json
+with open(results["summary_file"], "r") as f:
+    summary_data = json.load(f)
+
+print("\n📊 Validation Summary:")
+summary_data
+
+# ✅ Optional: Load and display unexpected results as DataFrame
+import pandas as pd
+with open(results["details_file"], "r") as f:
+    detail_data = json.load(f)
+
+print("\n📌 Validation Details:")
+pd.DataFrame(detail_data)
