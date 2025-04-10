@@ -45,9 +45,11 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
     # Create or get expectation suite
     suite_name = expectations_config.get("expectation_suite_name", "default_suite")
     try:
-        context.get_expectation_suite(suite_name)
+        suite = context.get_expectation_suite(suite_name)
+        suite_is_empty = len(suite.expectations) == 0
     except Exception:
         context.add_expectation_suite(expectation_suite_name=suite_name)
+        suite_is_empty = True
 
     # Create or load Fluent-style datasource
     if engine_type == "spark":
@@ -72,12 +74,11 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
         expectation_suite_name=suite_name,
     )
 
-    # Apply expectations
-    for exp in expectations_config["expectations"]:
-        getattr(validator, exp["expectation_type"])(**exp["kwargs"])
-
-    # Save suite
-    validator.save_expectation_suite()
+    # Apply expectations only if suite is empty
+    if suite_is_empty:
+        for exp in expectations_config["expectations"]:
+            getattr(validator, exp["expectation_type"])(**exp["kwargs"])
+        validator.save_expectation_suite()
 
     # Run validation
     results = validator.validate()
