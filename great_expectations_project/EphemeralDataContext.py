@@ -5,19 +5,16 @@ from datetime import datetime
 from sqlalchemy import create_engine
 import argparse
 import great_expectations as gx
-from great_expectations.core.batch import BatchRequest
 from great_expectations.render.renderer.v1.render_validation_results import ValidationResultsPageRenderer
 from great_expectations.render.view.view import DefaultJinjaPageView
 from pyspark.sql import SparkSession
 
 def run_data_validation(data_source_path, expectations_suite_path, results_capture_path=None):
-    # Load configuration files
     with open(data_source_path, "r") as f:
         data_config = json.load(f)
     with open(expectations_suite_path, "r") as f:
         expectations_config = json.load(f)
 
-    # Load the dataset
     source_type = data_config.get("source_type")
     if source_type == "csv":
         df = pd.read_csv(data_config["file_path"])
@@ -37,53 +34,50 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
         df = pd.read_sql(f"SELECT * FROM {db['table_name']}", engine)
         engine_type = "pandas"
     else:
-        raise ValueError("Unsupported source_type. Only 'csv', 'parquet', 'spark_csv', 'postgresql', and 'mysql' are supported.")
+        raise ValueError("Unsupported source_type")
 
-    # Initialize Great Expectations context (must be a full GE project)
     context = gx.get_context()
-
-    # Create or get expectation suite
     suite_name = expectations_config.get("expectation_suite_name", "default_suite")
+
     try:
-        suite = context.get_expectation_suite(suite_name)
+        suite = context.get_expectation_suite(expectation_suite_name=suite_name)
         suite_is_empty = len(suite.expectations) == 0
     except Exception:
-        context.add_expectation_suite(expectation_suite_name=suite_name)
+        suite = context.create_expectation_suite(expectation_suite_name=suite_name)
         suite_is_empty = True
 
-    # Create or load Fluent-style datasource
     if engine_type == "spark":
-        if "spark_filesystem_datasource" not in context.datasources:
-            context.sources.add_spark(name="spark_filesystem_datasource")
-        datasource_name = "spark_filesystem_datasource"
+        if "spark_inline" not in context.list_datasources():
+            datasource = context.sources.add_spark(name="spark_inline")
+        else:
+            datasource = context.get_datasource("spark_inline")
     else:
-        if "pandas_filesystem_datasource" not in context.datasources:
-            context.sources.add_pandas(name="pandas_filesystem_datasource")
-        datasource_name = "pandas_filesystem_datasource"
+        if "pandas_inline" not in context.list_datasources():
+            datasource = context.sources.add_pandas(name="pandas_inline")
+        else:
+            datasource = context.get_datasource("pandas_inline")
 
-    # Use in-memory asset
-    asset = context.datasources[datasource_name].add_dataframe_asset(
-        name="temp_asset", dataframe=df
-    )
+    asset_name = "inline_df"
+    if asset_name not in datasource.list_data_assets():
+        asset = datasource.add_dataframe_asset(name=asset_name, dataframe=df)
+    else:
+        asset = datasource.get_asset(asset_name)
+        asset.test_connection()
 
     batch_request = asset.build_batch_request()
 
-    # Get validator
     validator = context.get_validator(
         batch_request=batch_request,
         expectation_suite_name=suite_name,
     )
 
-    # Apply expectations only if suite is empty
     if suite_is_empty:
         for exp in expectations_config["expectations"]:
             getattr(validator, exp["expectation_type"])(**exp["kwargs"])
         validator.save_expectation_suite()
 
-    # Run validation
     results = validator.validate()
 
-    # Save results
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     suite_slug = suite_name.replace(" ", "_")
     os.makedirs("validation_results", exist_ok=True)
@@ -98,7 +92,6 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
     with open(details_file, "w") as f:
         json.dump(results.to_json_dict()["results"], f, indent=4)
 
-    # Save HTML report
     document_model = ValidationResultsPageRenderer().render(results)
     html_content = DefaultJinjaPageView().render(document_model)
 
@@ -119,10 +112,10 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
     }
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run Great Expectations validation using local config files.")
+    parser = argparse.ArgumentParser(description="Run GE validation using config files.")
     parser.add_argument("--data-source", required=True, help="Path to data_source_config.json")
     parser.add_argument("--expectations", required=True, help="Path to expectations_suite.json")
-    parser.add_argument("--results", required=False, help="Path to results_capture.json (optional)")
+    parser.add_argument("--results", required=False, help="Optional results config")
     args = parser.parse_args()
 
     run_data_validation(args.data_source, args.expectations, args.results)
