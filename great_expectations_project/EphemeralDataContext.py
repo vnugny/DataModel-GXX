@@ -5,10 +5,9 @@ from datetime import datetime
 from sqlalchemy import create_engine
 import argparse
 import great_expectations as gx
-from great_expectations.core.expectation_configuration import ExpectationConfiguration
 from great_expectations.core.batch import RuntimeBatchRequest
-from great_expectations.render.renderer import ValidationResultsPageRenderer
-from great_expectations.render.view import DefaultJinjaPageView
+from great_expectations.render.renderer.v1.render_validation_results import ValidationResultsPageRenderer
+from great_expectations.render.view.view import DefaultJinjaPageView
 from pyspark.sql import SparkSession
 
 def run_data_validation(data_source_path, expectations_suite_path, results_capture_path=None):
@@ -45,30 +44,17 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
 
     # Add appropriate datasource
     if "runtime_datasource" not in [ds['name'] for ds in context.list_datasources()]:
-        if engine_type == "spark":
-            context.add_datasource(
-                name="runtime_datasource",
-                class_name="Datasource",
-                execution_engine={"class_name": "SparkDFExecutionEngine"},
-                data_connectors={
-                    "default_runtime_data_connector_name": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": ["default_identifier_name"]
-                    }
+        context.add_datasource(
+            name="runtime_datasource",
+            class_name="Datasource",
+            execution_engine={"class_name": "SparkDFExecutionEngine" if engine_type == "spark" else "PandasExecutionEngine"},
+            data_connectors={
+                "default_runtime_data_connector_name": {
+                    "class_name": "RuntimeDataConnector",
+                    "batch_identifiers": ["default_identifier_name"]
                 }
-            )
-        else:
-            context.add_datasource(
-                name="runtime_datasource",
-                class_name="Datasource",
-                execution_engine={"class_name": "PandasExecutionEngine"},
-                data_connectors={
-                    "default_runtime_data_connector_name": {
-                        "class_name": "RuntimeDataConnector",
-                        "batch_identifiers": ["default_identifier_name"]
-                    }
-                }
-            )
+            }
+        )
 
     # Create or get expectation suite
     suite_name = expectations_config.get("expectation_suite_name", "default_suite")
@@ -92,12 +78,7 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
 
     # Load expectations from JSON
     for exp in expectations_config["expectations"]:
-        validator.expectation_suite.add_expectation(
-            ExpectationConfiguration(
-                expectation_type=exp["expectation_type"],
-                kwargs=exp["kwargs"]
-            )
-        )
+        getattr(validator, exp["expectation_type"])(**exp["kwargs"])
 
     context.save_expectation_suite(expectation_suite=validator.expectation_suite)
 
