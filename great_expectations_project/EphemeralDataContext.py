@@ -5,7 +5,7 @@ from datetime import datetime
 from sqlalchemy import create_engine
 import argparse
 import great_expectations as gx
-from great_expectations.core.batch import RuntimeBatchRequest
+from great_expectations.core.batch import BatchRequest
 from great_expectations.render.renderer.v1.render_validation_results import ValidationResultsPageRenderer
 from great_expectations.render.view.view import DefaultJinjaPageView
 from pyspark.sql import SparkSession
@@ -39,36 +39,32 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
     else:
         raise ValueError("Unsupported source_type. Only 'csv', 'parquet', 'spark_csv', 'postgresql', and 'mysql' are supported.")
 
-    # Initialize Great Expectations context
+    # Initialize Great Expectations context (must be a full GE project)
     context = gx.get_context()
-
-    # Add appropriate datasource
-    if "runtime_datasource" not in [ds['name'] for ds in context.list_datasources()]:
-        context.add_datasource(
-            name="runtime_datasource",
-            class_name="Datasource",
-            execution_engine={"class_name": "SparkDFExecutionEngine" if engine_type == "spark" else "PandasExecutionEngine"},
-            data_connectors={
-                "default_runtime_data_connector_name": {
-                    "class_name": "RuntimeDataConnector",
-                    "batch_identifiers": ["default_identifier_name"]
-                }
-            }
-        )
 
     # Create or get expectation suite
     suite_name = expectations_config.get("expectation_suite_name", "default_suite")
-    if suite_name not in [s.expectation_suite_name for s in context.list_expectation_suites()]:
+    try:
+        context.get_expectation_suite(suite_name)
+    except Exception:
         context.add_expectation_suite(expectation_suite_name=suite_name)
 
-    # Prepare batch request
-    batch_request = RuntimeBatchRequest(
-        datasource_name="runtime_datasource",
-        data_connector_name="default_runtime_data_connector_name",
-        data_asset_name="my_data_asset",
-        runtime_parameters={"batch_data": df},
-        batch_identifiers={"default_identifier_name": "default"},
+    # Create or load Fluent-style datasource
+    if engine_type == "spark":
+        if "spark_filesystem_datasource" not in context.datasources:
+            context.sources.add_spark(name="spark_filesystem_datasource")
+        datasource_name = "spark_filesystem_datasource"
+    else:
+        if "pandas_filesystem_datasource" not in context.datasources:
+            context.sources.add_pandas(name="pandas_filesystem_datasource")
+        datasource_name = "pandas_filesystem_datasource"
+
+    # Use in-memory asset
+    asset = context.datasources[datasource_name].add_dataframe_asset(
+        name="temp_asset", dataframe=df
     )
+
+    batch_request = asset.build_batch_request()
 
     # Get validator
     validator = context.get_validator(
@@ -76,13 +72,14 @@ def run_data_validation(data_source_path, expectations_suite_path, results_captu
         expectation_suite_name=suite_name,
     )
 
-    # Load expectations from JSON
+    # Apply expectations
     for exp in expectations_config["expectations"]:
         getattr(validator, exp["expectation_type"])(**exp["kwargs"])
 
-    context.save_expectation_suite(expectation_suite=validator.expectation_suite)
+    # Save suite
+    validator.save_expectation_suite()
 
-    # Validate data
+    # Run validation
     results = validator.validate()
 
     # Save results
