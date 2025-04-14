@@ -9,3 +9,9 @@ python validation.py --data-source configs/data_source_config.json --expectation
 python validation.py --data-source configs/data_source_config.json --expectations configs/expectations_suite.json
 
 
+for exp_config_dict in expectations_list:
+    expectation = ExpectationConfiguration(
+    type=exp_config_dict["type"],
+    kwargs=exp_config_dict["kwargs"]
+    )
+    suite.add_expectation_configuration(expectation)
