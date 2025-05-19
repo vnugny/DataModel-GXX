@@ -1,0 +1,77 @@
+[
+    {
+        "description": "Today",
+        "template": "{{ today() }}",
+        "context": {}
+    },
+    {
+        "description": "7 Days Ago",
+        "template": "{{ today_minus(days=7) }}",
+        "context": {}
+    },
+    {
+        "description": "10 Days Later",
+        "template": "{{ today_plus(days=10) }}",
+        "context": {}
+    },
+    {
+        "description": "Start of this Month",
+        "template": "{{ month_start() }}",
+        "context": {}
+    },
+    {
+        "description": "End of this Month",
+        "template": "{{ month_end() }}",
+        "context": {}
+    },
+    {
+        "description": "2 Months Ahead",
+        "template": "{{ month_plus(months=2) }}",
+        "context": {}
+    },
+    {
+        "description": "1 Month Ago",
+        "template": "{{ month_minus(months=1) }}",
+        "context": {}
+    },
+    {
+        "description": "Start of Current Quarter",
+        "template": "{{ quarter_start() }}",
+        "context": {}
+    },
+    {
+        "description": "End of Current Quarter",
+        "template": "{{ quarter_end() }}",
+        "context": {}
+    },
+    {
+        "description": "Next Quarter Start",
+        "template": "{{ quarter_plus(quarters=1) }}",
+        "context": {}
+    },
+    {
+        "description": "2 Quarters Back",
+        "template": "{{ quarter_minus(quarters=2) }}",
+        "context": {}
+    },
+    {
+        "description": "Start of Current Year",
+        "template": "{{ year_start() }}",
+        "context": {}
+    },
+    {
+        "description": "End of Current Year",
+        "template": "{{ year_end() }}",
+        "context": {}
+    },
+    {
+        "description": "Next Year Same Date",
+        "template": "{{ year_plus(years=1) }}",
+        "context": {}
+    },
+    {
+        "description": "1 Year Ago",
+        "template": "{{ year_minus(years=1) }}",
+        "context": {}
+    }
+]
